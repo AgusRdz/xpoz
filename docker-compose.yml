@@ -1,0 +1,12 @@
+services:
+  dev:
+    build: .
+    volumes:
+      - .:/app
+      - go-cache:/root/.cache/go
+      - go-mod:/go/pkg/mod
+    working_dir: /app
+
+volumes:
+  go-cache:
+  go-mod:

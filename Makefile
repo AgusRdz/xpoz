@@ -1,0 +1,107 @@
+VERSION  ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+BINARY   := bin/xpoz
+LDFLAGS  := -s -w -X main.version=$(VERSION)
+GOOS     ?= $(shell go env GOOS 2>/dev/null || echo linux)
+GOARCH   ?= $(shell go env GOARCH 2>/dev/null || echo amd64)
+EXT      := $(if $(filter windows,$(GOOS)),.exe,)
+
+ifeq ($(OS),Windows_NT)
+  INSTALL_DIR ?= $(LOCALAPPDATA)\Programs\xpoz
+else
+  INSTALL_DIR ?= $(HOME)/.local/bin
+endif
+
+.PHONY: build local-build test test-unit lint fmt clean install snapshot deps keygen release-patch release-minor release-major help
+
+## build: Build using Docker (recommended for reproducibility)
+build:
+	docker compose run --rm dev go build -ldflags="$(LDFLAGS)" -o $(BINARY) ./cmd/xpoz
+
+## local-build: Build without Docker (requires Go in PATH)
+local-build:
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build \
+		-ldflags="$(LDFLAGS)" -o $(BINARY)$(EXT) ./cmd/xpoz
+
+## test: Run all tests via Docker
+test:
+	docker compose run --rm dev go test ./...
+
+## test-unit: Run short (unit-only) tests
+test-unit:
+	docker compose run --rm dev go test -short ./...
+
+## lint: Run golangci-lint
+lint:
+	docker compose run --rm dev golangci-lint run
+
+## fmt: Format all Go source files
+fmt:
+	gofmt -w .
+
+## clean: Remove build artifacts
+clean:
+	rm -rf bin/
+
+## deps: Download and tidy all Go modules (run once after cloning)
+deps:
+	go get github.com/spf13/cobra@latest
+	go get github.com/spf13/viper@latest
+	go get modernc.org/sqlite@latest
+	go get github.com/cloudflare/cloudflare-go@latest
+	go get github.com/charmbracelet/lipgloss@latest
+	go get github.com/kardianos/service@latest
+	go get gopkg.in/yaml.v3@latest
+	go mod tidy
+
+## install: Build and install to INSTALL_DIR
+install: local-build
+	mkdir -p "$(INSTALL_DIR)"
+	cp $(BINARY)$(EXT) "$(INSTALL_DIR)/xpoz$(EXT)"
+	@echo "✓ xpoz $(VERSION) installed to $(INSTALL_DIR)"
+
+## snapshot: Test the full goreleaser pipeline locally without publishing
+snapshot:
+	goreleaser release --snapshot --clean
+
+## keygen: Generate Ed25519 signing key pair (one-time setup — keep signing.pem secret)
+keygen:
+	openssl genpkey -algorithm Ed25519 -out signing.pem
+	openssl pkey -in signing.pem -pubout -out public_key.pem
+	@echo ""
+	@echo "✓ Key pair generated"
+	@echo "  ⚠ signing.pem — never commit this. Add it base64-encoded to the SIGNING_KEY GitHub secret."
+	@echo "  ✓ public_key.pem — commit this to the repository."
+	@echo ""
+	@echo "  Base64 for GitHub secret:"
+	@base64 signing.pem
+
+## release-patch: Tag and release a patch version (e.g. v1.0.0 → v1.0.1)
+release-patch:
+	$(eval NEXT := $(shell git cliff --bumped-version --bump patch 2>/dev/null))
+	git cliff --tag $(NEXT) --output CHANGELOG.md
+	git add CHANGELOG.md
+	git commit -m "chore: release $(NEXT)"
+	git tag $(NEXT)
+	git push origin main $(NEXT)
+
+## release-minor: Tag and release a minor version (e.g. v1.0.0 → v1.1.0)
+release-minor:
+	$(eval NEXT := $(shell git cliff --bumped-version --bump minor 2>/dev/null))
+	git cliff --tag $(NEXT) --output CHANGELOG.md
+	git add CHANGELOG.md
+	git commit -m "chore: release $(NEXT)"
+	git tag $(NEXT)
+	git push origin main $(NEXT)
+
+## release-major: Tag and release a major version (e.g. v1.0.0 → v2.0.0)
+release-major:
+	$(eval NEXT := $(shell git cliff --bumped-version --bump major 2>/dev/null))
+	git cliff --tag $(NEXT) --output CHANGELOG.md
+	git add CHANGELOG.md
+	git commit -m "chore: release $(NEXT)"
+	git tag $(NEXT)
+	git push origin main $(NEXT)
+
+## help: Show available targets
+help:
+	@grep -E '^## ' Makefile | sed 's/^## /  /'
