@@ -56,4 +56,3 @@ release:
     owner: AgusRdz
     name: xpoz
   draft: false
-  generate_release_notes: false
