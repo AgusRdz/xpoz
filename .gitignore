@@ -5,3 +5,6 @@ dist/
 *.out
 signing.pem
 .env
+CLAUDE.md
+PLAN.md
+TECHNICAL.md
