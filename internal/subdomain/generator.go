@@ -23,7 +23,7 @@ const (
 // The caller supplies this function to avoid a package-level dependency on store.
 type Taken func(ctx context.Context, sub string) bool
 
-var validSubdomain = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$`)
+var validSubdomain = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$`)
 
 // IsValid reports whether s is a safe, DNS-compatible subdomain component.
 func IsValid(s string) bool {

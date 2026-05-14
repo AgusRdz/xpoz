@@ -14,6 +14,7 @@ var version = "dev"
 func main() {
 	updater.ApplyPending(version)
 	updater.NotifyIfAvailable(version)
+	updater.BackgroundCheck(version)
 
 	if err := cli.Execute(version); err != nil {
 		fmt.Fprintln(os.Stderr, "✗", err)

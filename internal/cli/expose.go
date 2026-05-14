@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
-	"os/exec"
 	"strconv"
 	"time"
 
@@ -61,38 +59,9 @@ func runExpose(cmd *cobra.Command, args []string) error {
 	fullURL := "https://" + hostname
 
 	if flagBg {
-		return launchBackground(cmd.OutOrStdout(), port, sub, fullURL)
+		return startDetached(cmd.OutOrStdout(), port, sub, fullURL, flagName)
 	}
 	return runTunnel(cmd, s, cfg, sub, hostname, fullURL, port)
-}
-
-func launchBackground(out io.Writer, port int, sub, fullURL string) error {
-	args := buildChildArgs(port, sub, flagName)
-	proc := exec.Command(os.Args[0], args...)
-	proc.Stdin = nil
-	proc.Stdout = nil
-	proc.Stderr = nil
-	setSysProcAttr(proc)
-
-	if err := proc.Start(); err != nil {
-		return fmt.Errorf("starting background process: %w", err)
-	}
-
-	printSuccess(out, "Tunnel started in background")
-	fmt.Fprintln(out, "  "+urlStyle.Render(fullURL))
-	fmt.Fprintf(out, "  %s  localhost:%d\n", dimStyle.Render("forwarding to"), port)
-	fmt.Fprintf(out, "  %s  %d\n", dimStyle.Render("PID"), proc.Process.Pid)
-	fmt.Fprintln(out, dimStyle.Render("  Stop with: kill "+strconv.Itoa(proc.Process.Pid)))
-	fmt.Fprintln(out)
-	return nil
-}
-
-func buildChildArgs(port int, sub, name string) []string {
-	args := []string{strconv.Itoa(port), "--subdomain=" + sub}
-	if name != "" {
-		args = append(args, "--name="+name)
-	}
-	return args
 }
 
 func runTunnel(cmd *cobra.Command, s store.Store, cfg *config.Config, sub, hostname, fullURL string, port int) error {
@@ -121,11 +90,13 @@ func runTunnel(cmd *cobra.Command, s store.Store, cfg *config.Config, sub, hostn
 		}
 	}
 
+	// use Background ctx — original is cancelled at this point
 	cleanCtx := context.Background()
 	fmt.Fprintln(out)
 	prx.RemoveRoute(hostname)
 	_ = prx.Stop()
 	if flagName != "" {
+		removePID(flagName)
 		_ = s.SetActive(cleanCtx, flagName, false)
 	}
 	printSuccess(out, "Tunnel closed.")
@@ -164,6 +135,14 @@ func upsertActiveTunnel(ctx context.Context, s store.Store, name, sub, fullURL s
 		Name: name, Subdomain: sub, FullURL: fullURL,
 		LocalPort: port, Active: true, CreatedAt: now, LastUsed: now,
 	})
+}
+
+func buildChildArgs(port int, sub, name string) []string {
+	args := []string{strconv.Itoa(port), "--subdomain=" + sub}
+	if name != "" {
+		args = append(args, "--name="+name)
+	}
+	return args
 }
 
 func printTunnelReady(w io.Writer, fullURL string, localPort int) {

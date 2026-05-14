@@ -31,3 +31,7 @@ func printWarn(w io.Writer, msg string) {
 func printStep(w io.Writer, n int, msg string) {
 	fmt.Fprintf(w, "\n%s %s\n", dimStyle.Render(fmt.Sprintf("[%d]", n)), msg)
 }
+
+func printInfo(w io.Writer, msg string) {
+	fmt.Fprintln(w, boldStyle.Render("→")+" "+msg)
+}
