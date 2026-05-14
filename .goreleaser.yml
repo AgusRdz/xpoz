@@ -1,9 +1,5 @@
 version: 2
 
-before:
-  hooks:
-    - go mod tidy
-
 builds:
   - id: xpoz
     main: ./cmd/xpoz
@@ -26,11 +22,12 @@ builds:
 archives:
   - id: xpoz
     name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
-    format: tar.gz
+    formats:
+      - tar.gz
     format_overrides:
       - goos: windows
-        format: zip
-    wrap_in_directory: false
+        formats:
+          - zip
 
 checksum:
   name_template: checksums.txt

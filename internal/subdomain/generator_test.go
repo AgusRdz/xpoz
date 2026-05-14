@@ -18,13 +18,13 @@ func TestIsValid(t *testing.T) {
 		{"a-b", true},
 		{"abc123", true},
 		{"", false},
-		{"a", false},           // too short (< 2 chars)
-		{"-foo", false},        // leading hyphen
-		{"foo-", false},        // trailing hyphen
-		{"FOO", false},         // uppercase
-		{"foo bar", false},     // space
-		{"foo.bar", false},     // dot
-		{"foo_bar", false},     // underscore
+		{"a", false},                     // too short (< 2 chars)
+		{"-foo", false},                  // leading hyphen
+		{"foo-", false},                  // trailing hyphen
+		{"FOO", false},                   // uppercase
+		{"foo bar", false},               // space
+		{"foo.bar", false},               // dot
+		{"foo_bar", false},               // underscore
 		{strings.Repeat("a", 64), false}, // too long (> 64 chars)
 	}
 	for _, tc := range tests {
