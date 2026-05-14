@@ -1,0 +1,18 @@
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    volumes:
+      - ${HOME}/.cloudflared:/home/nonroot/.cloudflared:ro
+    command: tunnel run
+    # network_mode: host   ← uncomment on Linux so cloudflared can reach localhost:2080
+    #
+    # On macOS / Windows (Docker Desktop), host.docker.internal is used instead.
+    # Replace localhost with host.docker.internal in ~/.cloudflared/config.yml:
+    #
+    #   ingress:
+    #     - hostname: "*.yourdomain.com"
+    #       service: http://host.docker.internal:2080   ← change this line
+    #     - service: http_status:404
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # no-op on Mac/Win (already set by Docker Desktop)
