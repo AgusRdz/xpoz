@@ -47,8 +47,12 @@ signs:
       - SIGNING_KEY
 
 changelog:
-  use: git-cliff
+  use: git
   sort: desc
+  filters:
+    exclude:
+      - "^chore:"
+      - "^docs:"
 
 release:
   github:

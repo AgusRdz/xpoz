@@ -6,8 +6,14 @@ set -e
 
 ARTIFACT="$1"
 SIGNATURE="$2"
-KEYFILE="/tmp/xpoz-signing-$$.pem"
 
+if [ -z "$SIGNING_KEY" ]; then
+  echo "WARNING: SIGNING_KEY not set — skipping signature for $ARTIFACT" >&2
+  touch "$SIGNATURE"
+  exit 0
+fi
+
+KEYFILE="/tmp/xpoz-signing-$$.pem"
 echo "$SIGNING_KEY" | base64 -d > "$KEYFILE"
 openssl pkeyutl -sign -inkey "$KEYFILE" -rawin -in "$ARTIFACT" \
   | xxd -p -c 256 | tr -d '\n' > "$SIGNATURE"
