@@ -11,7 +11,7 @@ else
   INSTALL_DIR ?= $(HOME)/.local/bin
 endif
 
-.PHONY: build local-build test test-unit lint fmt clean install snapshot deps keygen release-patch release-minor release-major help
+.PHONY: build local-build test test-unit lint fmt clean install snapshot deps keygen hooks release-patch release-minor release-major help
 
 ## build: Build using Docker (recommended for reproducibility)
 build:
@@ -58,6 +58,12 @@ install: local-build
 	mkdir -p "$(INSTALL_DIR)"
 	cp $(BINARY)$(EXT) "$(INSTALL_DIR)/xpoz$(EXT)"
 	@echo "✓ xpoz $(VERSION) installed to $(INSTALL_DIR)"
+
+## hooks: Install git hooks (run once after cloning)
+hooks:
+	git config core.hooksPath .githooks
+	chmod +x .githooks/pre-commit
+	@echo "OK: git hooks installed"
 
 ## snapshot: Test the full goreleaser pipeline locally without publishing
 snapshot:

@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"log"
 
+	svc "github.com/kardianos/service"
+	"github.com/spf13/cobra"
+
 	"github.com/AgusRdz/xpoz/internal/config"
 	"github.com/AgusRdz/xpoz/internal/proxy"
 	"github.com/AgusRdz/xpoz/internal/store"
-	svc "github.com/kardianos/service"
-	"github.com/spf13/cobra"
 )
 
 var serviceCmd = &cobra.Command{

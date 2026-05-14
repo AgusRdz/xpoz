@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/spf13/cobra"
+
 	"github.com/AgusRdz/xpoz/internal/config"
 	"github.com/AgusRdz/xpoz/internal/store"
-	"github.com/spf13/cobra"
 )
 
 var startCmd = &cobra.Command{

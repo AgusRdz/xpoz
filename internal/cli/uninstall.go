@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/AgusRdz/xpoz/internal/cleanup"
 	"github.com/AgusRdz/xpoz/internal/config"
-	"github.com/spf13/cobra"
 )
 
 var flagKeepData bool

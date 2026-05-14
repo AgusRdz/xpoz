@@ -8,11 +8,12 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/spf13/cobra"
+
 	"github.com/AgusRdz/xpoz/internal/config"
 	"github.com/AgusRdz/xpoz/internal/dns"
 	"github.com/AgusRdz/xpoz/internal/store"
 	"github.com/AgusRdz/xpoz/internal/tunnel"
-	"github.com/spf13/cobra"
 )
 
 var doctorCmd = &cobra.Command{

@@ -8,11 +8,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/spf13/cobra"
+
 	"github.com/AgusRdz/xpoz/internal/config"
 	"github.com/AgusRdz/xpoz/internal/proxy"
 	"github.com/AgusRdz/xpoz/internal/store"
 	"github.com/AgusRdz/xpoz/internal/subdomain"
-	"github.com/spf13/cobra"
 )
 
 var (

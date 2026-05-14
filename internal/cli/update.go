@@ -3,8 +3,9 @@ package cli
 import (
 	"fmt"
 
-	"github.com/AgusRdz/xpoz/internal/updater"
 	"github.com/spf13/cobra"
+
+	"github.com/AgusRdz/xpoz/internal/updater"
 )
 
 var updateCmd = &cobra.Command{

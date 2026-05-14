@@ -1,0 +1,9 @@
+#!/bin/sh
+# Pre-commit: run golangci-lint (includes gofmt + goimports) via Docker.
+set -e
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$' || true)
+[ -z "$STAGED" ] && exit 0
+
+echo "Running golangci-lint..."
+docker compose run --rm dev golangci-lint run ./...
