@@ -28,10 +28,11 @@ type Store interface {
 	// List returns all saved tunnels ordered by created_at descending.
 	List(ctx context.Context) ([]*Tunnel, error)
 	// Upsert creates or updates a tunnel record.
+	// On conflict, created_at is preserved and all other fields are updated.
 	Upsert(ctx context.Context, t *Tunnel) error
-	// Delete removes the tunnel with the given name.
+	// Delete removes the tunnel with the given name, or ErrNotFound.
 	Delete(ctx context.Context, name string) error
-	// SetActive updates the active flag of the named tunnel.
+	// SetActive updates the active flag of the named tunnel, or ErrNotFound.
 	SetActive(ctx context.Context, name string, active bool) error
 	// Close releases database resources.
 	Close() error
@@ -39,9 +40,3 @@ type Store interface {
 
 // ErrNotFound is returned when a tunnel does not exist in the store.
 var ErrNotFound = fmt.Errorf("tunnel not found")
-
-// New opens (or creates) the SQLite database at path and runs schema migrations.
-func New(path string) (Store, error) {
-	// TODO: implement in Phase 1
-	return nil, fmt.Errorf("store: not implemented")
-}

@@ -2,6 +2,11 @@
 package cli
 
 import (
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/spf13/cobra"
 )
 
@@ -20,10 +25,14 @@ Run 'xpoz setup' to get started.`,
 }
 
 // Execute is the CLI entry point called from main.
+// It wires a signal-aware context so Ctrl+C cancels the running command.
 func Execute(version string) error {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	rootCmd.Version = version
 	rootCmd.SetVersionTemplate("xpoz {{.Version}}\n")
-	return rootCmd.Execute()
+	return rootCmd.ExecuteContext(ctx)
 }
 
 func init() {
